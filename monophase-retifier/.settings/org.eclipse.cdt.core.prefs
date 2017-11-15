@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+environment/project/0.910961921/PATH/delimiter=\:
+environment/project/0.910961921/PATH/operation=replace
+environment/project/0.910961921/PATH/value=/usr/local/sbin\:/usr/local/bin\:/usr/bin\:/opt/adobe-air-sdk/bin\:/opt/android-sdk/platform-tools\:/opt/android-sdk/tools\:/opt/android-sdk/tools/bin\:/opt/brlcad-bin/bin\:/usr/lib/jvm/default/bin\:/opt/microchip/xc8/v1.38/bin\:/opt/opencascade/bin\:/usr/bin/site_perl\:/usr/bin/vendor_perl\:/usr/bin/core_perl\:/home/sytabaresa/programprojects/go/bin/\:/home/sytabaresa/.gem/ruby/2.4.0/bin
+environment/project/0.910961921/append=true
+environment/project/0.910961921/appendContributed=true
