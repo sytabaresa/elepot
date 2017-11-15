@@ -8,17 +8,29 @@
 #define SD    2
 #define H     1
 #define L     0
+
+#elif ATTINYX61
+#define POT1  A5
+#define SEL1  A6
+#define SD    PIN_B2
+#define H     PIN_B0
+#define L     PIN_B1
 #endif
+
+
+#define DEADRISING 5
+#define DEADFALLING 5
 
 volatile uint8_t pwmValue = 0;
 volatile uint8_t index = 0;
-uint8_t counter = 0;
+uint16_t counter = 0;
 
 //void updatePWM() {
 ISR(TIMER1_OVF_vect) {
-  if (counter++ >= 32){ //10khz
+  if (counter++ >= 2){ //10khz
     counter = 0;
-    index == 166 ? index=0 : index++;
+    index++;
+    if (index == LEN) index=0;
     OCR1A = pwmValue;
   }
 }
@@ -44,7 +56,15 @@ void setup() {
   TIMSK = _BV(TOIE1); // interrupt enable when TCNT1 overflows (TCNT1 == OCR1A).
   OCR1C = 199; // top value for TCNT1 for PWM freq = 20khz, R = 7.6
   OCR1A = 100; // initial value of comparation
+  #ifdef ATTINYx5
   TCCR1 = _BV(PWM1A) | _BV(COM1A0) | _BV(CS12); //activates complementary mode in A and 1:8 prescaler
+  //DT1A = (0xF0 & (DEADRISING << 4)) | (0x0F & DEADFALLING);
+  #elif ATTINYX61
+  TCCR1A = _BV(PWM1A) | _BV(COM1A0); //activates complementary mode in A
+  TCCR1B = _BV(CS11) | _BV(CS10); //1:4 prescaler
+  //DT1 = (0xF0 & (DEADRISING << 4)) | (0x0F & DEADFALLING);
+  #endif
+  //DTPS1 = _BV(DTPS10); //prescaler 1:1
 
   /*timer0 conf*/
   //OCR0A = 100; // 100 us
