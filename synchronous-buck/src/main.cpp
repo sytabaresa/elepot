@@ -23,14 +23,23 @@
 
 volatile uint8_t pwmValue = 0;
 volatile uint8_t index = 0;
+
+#define MAX_COUNTER 1
 uint16_t counter = 0;
 
-//void updatePWM() {
+/* UPDATE PWM
+// f_wave := f_PCK / (prescaler * (OCR1C+1) * ARRAY_LEN * (MAX_COUNTER+1)) ~= 60.24Hz
+// f_PCK := 32Mhz
+// prescaler := 8
+// OCR1C := 199
+// ARRAY_LEN := 166
+// MAX_COUNTER := 1
+*/
 ISR(TIMER1_OVF_vect) {
-  if (counter++ >= 2){ //10khz
+  if (counter++ >= MAX_COUNTER){
     counter = 0;
     index++;
-    if (index == LEN) index=0;
+    if (index == ARRAY_LEN) index=0;
     OCR1A = pwmValue;
   }
 }
