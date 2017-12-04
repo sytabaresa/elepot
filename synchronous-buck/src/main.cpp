@@ -18,8 +18,8 @@
 #endif
 
 
-#define DEADRISING 5
-#define DEADFALLING 5
+//#define DEADRISING 5
+//#define DEADFALLING 5
 
 volatile uint8_t pwmValue = 0;
 volatile uint8_t index = 0;
@@ -87,6 +87,6 @@ uint16_t tmp = 0;
 void loop() {
   tmp = analogRead(SEL1);
   if (tmp <= 512) pwmValue = analogRead(POT1) >> 2;
-  else if (tmp > 512 && tmp <= 853) pwmValue = D1[index];
-  else pwmValue = D2[index];
+  else if (tmp > 512 && tmp <= 853) pwmValue = pgm_read_byte(&(D1[index]));
+  else pwmValue = pgm_read_byte(&(D2[index]));
 }

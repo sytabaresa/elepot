@@ -24,7 +24,7 @@
 
 // For the Attiny45,Attiny861
 // The hardware timer runs at 1MHz, Using a
-// divide by 32 on the counter each count is 
+// divide by 32 on the counter each count is
 // 16 microseconds. 1/2 wave of a 60Hz AC signal
 // is about 32 counts (8,333 microseconds).
 
@@ -96,7 +96,6 @@ void setup(){
   // set up zero crossing interrupt
   //TODO: not use library?
   enableInterrupt(DETECT1, zeroCrossingInterrupt, MODE);
-  #endif
 }
 
 ISR(TIMER1_COMPA_vect){ //comparator match

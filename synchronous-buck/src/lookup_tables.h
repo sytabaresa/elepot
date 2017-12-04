@@ -10,7 +10,7 @@ https://docs.google.com/spreadsheets/d/1UtXzdGsx8a0OHYvLXqKkCJ48qxz2pVwkHPIFW54R
 */
 #define ARRAY_LEN 166
 // D1(t) = 0.8333*|sin(2*pi*60*t)|
-static const uint8_t D1[ARRAY_LEN] = {
+static const uint8_t D1[ARRAY_LEN] PROGMEM = {
   0,
   8,
   16,
@@ -180,7 +180,7 @@ static const uint8_t D1[ARRAY_LEN] = {
 };
 
 // D2(t) = (5 + 5*sin(2*pi*60*t)/12
-static const uint8_t D2[ARRAY_LEN] = {
+static const uint8_t D2[ARRAY_LEN]  PROGMEM = {
   107,
   111,
   115,
