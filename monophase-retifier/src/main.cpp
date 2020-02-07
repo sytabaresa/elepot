@@ -40,93 +40,100 @@ AVR_MCU(F_CPU, "attiny45");
 
 //Pin Mapping
 #ifdef ATTINY45
-#define DETECT1 4  //zero cross detect
-#define GATE1 1    //TRIAC gate
-#define POTIN1  A1 // pin 4 Potentiometer input
+#define DETECT1 4 //zero cross detect
+#define GATE1 1   //TRIAC gate
+#define POTIN1 A1 // pin 4 Potentiometer input
 
 #elif NANO
-#define DETECT1 2  //zero cross detect
-#define GATE1 18    //TRIAC gate
-#define POTIN1  A6 // Potentiometer input
+#define DETECT1 2 //zero cross detect
+#define GATE1 18  //TRIAC gate
+#define POTIN1 A6 // Potentiometer input
 #endif
 
 //constants
 #define MINV 65
 #define MAXV 483
 #define POWER_OFF 470
-#define PULSE 4   //trigger pulse width (counts)
+#define PULSE 4 //trigger pulse width (counts)
 
 //variables
-volatile int i=100;
+volatile int i = 100;
 
 //Interrupt Service Routines
 
-void zeroCrossingInterrupt(){ //zero cross detect
-  #ifdef NANO
-  if(i<POWER_OFF)
-    TCCR1B=0x04; //start timer with divide by 256 input
-  #elif ATTINY45
-  TCCR1=0x06;  //start timer with divide by 32 input
-  #endif
-  TCNT1 = 0;   //reset timer - count from zero
+void zeroCrossingInterrupt()
+{ //zero cross detect
+#ifdef NANO
+  if (i < POWER_OFF) //power of in software
+    TCCR1B = 0x04;   //start timer with divide by 256 input
+#elif ATTINY45
+  TCCR1 = 0x06; //start timer with divide by 32 input
+#endif
+  TCNT1 = 0; //reset timer - count from zero
 }
 
-void setup(){
+void setup()
+{
   // set up pins
   Serial.begin(9600);
   Serial.println("inicio");
 
-  pinMode(POTIN1, INPUT); // Analog read
+  pinMode(POTIN1, INPUT);     // Analog read
   digitalWrite(POTIN1, HIGH); //enable pull-up resistor
 
-  pinMode(GATE1, OUTPUT);      //TRIAC gate control
-  pinMode(LED_BUILTIN, OUTPUT);      //TRIAC gate control
-  pinMode(DETECT1, INPUT);     //zero cross detect
-  digitalWrite(DETECT1, HIGH); //enable pull-up resistor
+  pinMode(GATE1, OUTPUT);       //TRIAC gate control
+  pinMode(LED_BUILTIN, OUTPUT); //TRIAC gate control
+  pinMode(DETECT1, INPUT);      //zero cross detect
+  digitalWrite(DETECT1, HIGH);  //enable pull-up resistor
 
   // set up Timer1
-  OCR1A = 255;      //initialize the comparator
-  #ifdef NANO
+  OCR1A = 255; //initialize the comparator
+#ifdef NANO
   //(see ATMEGA 328 data sheet pg 134 for more details)
-  TIMSK1 = 0x03;  //enable comparator A and overflow interrupts
-  TCCR1A = 0x00;  //timer control registers set for
-  TCCR1B = 0x00;  //normal operation, timer disabled
-  #elif ATTINY45
-  TIMSK = 0x44;    //enable comparator A and overflow interrupts
-  TCCR1 = 0x00;    //timer control registers set for
-                   //normal operation, timer disabled
-  #endif
+  TIMSK1 = 0x03; //enable comparator A and overflow interrupts
+  TCCR1A = 0x00; //timer control registers set for
+  TCCR1B = 0x00; //normal operation, timer disabled
+#elif ATTINY45
+  TIMSK = 0x44; //enable comparator A and overflow interrupts
+  TCCR1 = 0x00; //timer control registers set for
+                //normal operation, timer disabled
+#endif
 
   // set up zero crossing interrupt
   //TODO: not use library?
   enableInterrupt(DETECT1, zeroCrossingInterrupt, MODE);
 }
 
-ISR(TIMER1_COMPA_vect){ //comparator match
-// Serial.println("d");
-  digitalWrite(GATE1,HIGH);  //set TRIAC gate to high
+ISR(TIMER1_COMPA_vect)
+{                            //comparator match
+                             // Serial.println("d");
+  digitalWrite(GATE1, HIGH); //set TRIAC gate to high
   //OCR1A = 0x00;
-  TCNT1 = 65536 - PULSE;      //trigger pulse width
+  TCNT1 = 65536 - PULSE; //trigger pulse width
 }
 
-ISR(TIMER1_OVF_vect){ //timer1 overflow
-// Serial.println("low");
-  digitalWrite(GATE1,LOW); //turn off TRIAC gate                                              
-  #ifdef NANO
-  TCCR1B = 0x00;          //disable timer stopd unintended triggers
-  #elif ATTINY45
-  TCCR1 = 0x00;          //disable timer stopd unintended triggers
-  #endif
+ISR(TIMER1_OVF_vect)
+{                           //timer1 overflow
+                            // Serial.println("low");
+  digitalWrite(GATE1, LOW); //turn off TRIAC gate
+#ifdef NANO
+  TCCR1B = 0x00; //disable timer stopd unintended triggers
+#elif ATTINY45
+  TCCR1 = 0x00; //disable timer stopd unintended triggers
+#endif
 }
 
-void loop(){
-  i = analogRead(POTIN1) >> 1;     //set the compare register brightness desired.
-  if (i < MINV) i = MINV;
-  if (i > MAXV) i = MAXV;
+void loop()
+{
+  i = analogRead(POTIN1) >> 1; //set the compare register brightness desired.
+  if (i < MINV)
+    i = MINV;
+  if (i > MAXV)
+    i = MAXV;
   // i = 128;
   // Serial.println(analogRead(GATE1));
   Serial.println(i);
-  analogWrite(LED_BUILTIN,i);
+  analogWrite(LED_BUILTIN, i);
   OCR1A = i;
   // int a = digitalRead(DETECT1);
   // digitalWrite(17,a);
