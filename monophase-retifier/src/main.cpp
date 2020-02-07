@@ -41,28 +41,30 @@ AVR_MCU(F_CPU, "attiny45");
 //Pin Mapping
 #ifdef ATTINY45
 #define DETECT1 4  //zero cross detect
-#define GATE1 3    //TRIAC gate
+#define GATE1 1    //TRIAC gate
 #define POTIN1  A1 // pin 4 Potentiometer input
 
 #elif NANO
-#define DETECT1 0  //zero cross detect
-#define GATE1 2    //TRIAC gate
-#define POTIN1  A1 // Potentiometer input
+#define DETECT1 2  //zero cross detect
+#define GATE1 18    //TRIAC gate
+#define POTIN1  A6 // Potentiometer input
 #endif
 
 //constants
-#define MINV 3
-#define MAXV 240
+#define MINV 65
+#define MAXV 483
+#define POWER_OFF 470
 #define PULSE 4   //trigger pulse width (counts)
 
 //variables
-int i=100;
+volatile int i=100;
 
 //Interrupt Service Routines
 
 void zeroCrossingInterrupt(){ //zero cross detect
   #ifdef NANO
-  TCCR1B=0x04; //start timer with divide by 256 input
+  if(i<POWER_OFF)
+    TCCR1B=0x04; //start timer with divide by 256 input
   #elif ATTINY45
   TCCR1=0x06;  //start timer with divide by 32 input
   #endif
@@ -71,7 +73,9 @@ void zeroCrossingInterrupt(){ //zero cross detect
 
 void setup(){
   // set up pins
-  //Serial.begin(9600);
+  Serial.begin(9600);
+  Serial.println("inicio");
+
   pinMode(POTIN1, INPUT); // Analog read
   digitalWrite(POTIN1, HIGH); //enable pull-up resistor
 
@@ -99,13 +103,15 @@ void setup(){
 }
 
 ISR(TIMER1_COMPA_vect){ //comparator match
+// Serial.println("d");
   digitalWrite(GATE1,HIGH);  //set TRIAC gate to high
   //OCR1A = 0x00;
-  TCNT1 = 0xFF - PULSE;      //trigger pulse width
+  TCNT1 = 65536 - PULSE;      //trigger pulse width
 }
 
 ISR(TIMER1_OVF_vect){ //timer1 overflow
-  digitalWrite(GATE1,LOW); //turn off TRIAC gate
+// Serial.println("low");
+  digitalWrite(GATE1,LOW); //turn off TRIAC gate                                              
   #ifdef NANO
   TCCR1B = 0x00;          //disable timer stopd unintended triggers
   #elif ATTINY45
@@ -114,11 +120,15 @@ ISR(TIMER1_OVF_vect){ //timer1 overflow
 }
 
 void loop(){
-
-  i = analogRead(POTIN1) >> 2;     //set the compare register brightness desired.
+  i = analogRead(POTIN1) >> 1;     //set the compare register brightness desired.
   if (i < MINV) i = MINV;
   if (i > MAXV) i = MAXV;
-  //Serial.println(i);
+  // i = 128;
+  // Serial.println(analogRead(GATE1));
+  Serial.println(i);
   analogWrite(LED_BUILTIN,i);
   OCR1A = i;
+  // int a = digitalRead(DETECT1);
+  // digitalWrite(17,a);
+  delay(15);
 }
